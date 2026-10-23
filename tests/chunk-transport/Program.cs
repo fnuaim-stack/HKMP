@@ -127,7 +127,19 @@ internal static class Program {
         }
     }
 
+    private static void TestStopClearsPreviousConnectionQueue() {
+        var sender = new TestSender();
+        sender.EnqueuePacket(new Packet(new byte[] { 10, 11 }));
+        sender.EnqueuePacket(new Packet(new byte[] { 12, 13 }));
+        sender.Stop();
+
+        bool completed = false;
+        sender.FinishSendingData(() => completed = true);
+        Check(completed, "stop clears queued old-connection handshake data");
+    }
+
     private static void Main() {
+        TestStopClearsPreviousConnectionQueue();
         TestMultipleChunksAndForeignSlice();
         Console.WriteLine($"PASS: {_checks} real sender/receiver chunk-transfer checks");
     }
