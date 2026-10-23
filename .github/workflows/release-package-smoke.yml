@@ -1,0 +1,59 @@
+name: Windows release packaging smoke
+
+on:
+  push:
+    branches: [master, coop-gameplay-stability]
+    paths:
+      - 'scripts/package-release.ps1'
+      - '.github/workflows/release-package-smoke.yml'
+  pull_request:
+    paths:
+      - 'scripts/package-release.ps1'
+      - '.github/workflows/release-package-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify packaging requirements and contents with disposable mock inputs
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path smoke/client,smoke/server,smoke/deps -Force | Out-Null
+          'mock-client' | Set-Content smoke/client/HKMP.dll
+          'mock-server' | Set-Content smoke/server/HKMPServer.exe
+          'mock-crypto' | Set-Content smoke/deps/BouncyCastle.Cryptography.dll
+          'mock-json' | Set-Content smoke/deps/Newtonsoft.Json.dll
+          ./scripts/package-release.ps1 -ClientDir smoke/client -ServerDir smoke/server -DependencyDir smoke/deps -OutputDir smoke/dist -SourceCommit "$env:GITHUB_SHA" -Version "v3.0.0-coop-rc1"
+          $zip1='smoke/dist/HKMP-client-v3.0.0-coop-rc1.zip'
+          $zip2='smoke/dist/HKMP-server-v3.0.0-coop-rc1.zip'
+          if (!(Test-Path $zip1) -or !(Test-Path $zip2) -or !(Test-Path smoke/dist/SHA256SUMS.txt)) {
+            throw 'Missing expected release outputs'
+          }
+          Add-Type -AssemblyName System.IO.Compression
+          $a=[System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zip1).Path)
+          try {
+            $contents=@($a.Entries | ForEach-Object { $_.FullName })
+            if ('HKMP.dll' -notin $contents -or 'BouncyCastle.Cryptography.dll' -notin $contents) {
+              throw 'Client bundle missing required dependencies'
+            }
+          } finally { $a.Dispose() }
+          $b=[System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zip2).Path)
+          try {
+            $contents=@($b.Entries | ForEach-Object { $_.FullName })
+            foreach ($name in @('HKMPServer.exe','HKMP.dll','BouncyCastle.Cryptography.dll','Newtonsoft.Json.dll')) {
+              if ($name -notin $contents) { throw "Server bundle missing $name" }
+            }
+          } finally { $b.Dispose() }
+          $rejected=$false
+          try {
+            ./scripts/package-release.ps1 -ClientDir smoke/client -ServerDir smoke/server -OutputDir smoke/should-not-exist -SourceCommit "$env:GITHUB_SHA" -Version "v3.0.0-coop-rc1"
+          } catch {
+            $rejected=$true
+          }
+          if (-not $rejected) { throw 'Expected missing-dependency validation to fail' }
+          Write-Host 'Packaging test passed (no game binaries used)'
