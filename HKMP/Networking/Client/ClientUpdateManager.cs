@@ -41,7 +41,7 @@ internal class ClientUpdateManager : UdpUpdateManager<ServerUpdatePacket, Server
     /// <param name="sliceId">The ID of the slice within the chunk.</param>
     /// <param name="numSlices">The number of slices in the chunk.</param>
     /// <param name="data">The raw data in the slice as a byte array.</param>
-    public void SetSliceData(byte chunkId, byte sliceId, byte numSlices, byte[] data) {
+    public void SetSliceData(byte chunkId, byte sliceId, ushort numSlices, byte[] data) {
         lock (Lock) {
             var sliceData = new SliceData {
                 ChunkId = chunkId,

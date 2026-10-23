@@ -16,7 +16,7 @@ internal class ServerChunkSender : ChunkSender {
     }
 
     /// <inheritdoc />
-    protected override void SetSliceData(byte chunkId, byte sliceId, byte numSlices, byte[] data) {
+    protected override void SetSliceData(byte chunkId, byte sliceId, ushort numSlices, byte[] data) {
         _updateManager.SetSliceData(chunkId, sliceId, numSlices, data);
     }
 }

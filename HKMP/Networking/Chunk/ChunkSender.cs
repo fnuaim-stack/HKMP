@@ -315,7 +315,7 @@ internal abstract class ChunkSender {
             Array.Copy(_chunkData, startIndex, sliceBytes, 0, sliceBytes.Length);
         }
 
-        SetSliceData(_chunkId, (byte) _currentSliceId, (byte) _numSlices, sliceBytes);
+        SetSliceData(_chunkId, (byte) _currentSliceId, (ushort) _numSlices, sliceBytes);
     }
 
     /// <summary>
@@ -348,5 +348,5 @@ internal abstract class ChunkSender {
     /// <param name="sliceId">The ID of the slice.</param>
     /// <param name="numSlices">The number of slices in this chunk.</param>
     /// <param name="data">The byte array containing the data of the slice.</param>
-    protected abstract void SetSliceData(byte chunkId, byte sliceId, byte numSlices, byte[] data);
+    protected abstract void SetSliceData(byte chunkId, byte sliceId, ushort numSlices, byte[] data);
 }
