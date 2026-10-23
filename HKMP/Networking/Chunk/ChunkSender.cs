@@ -115,6 +115,10 @@ internal abstract class ChunkSender {
         _sendTaskTokenSource?.Cancel();
         _sendTaskTokenSource?.Dispose();
         _sendTaskTokenSource = null;
+
+        // Queued handshake packets from the old server must never be sent to
+        // another server when the same NetClient reconnects.
+        while (_toSendPackets.TryTake(out _)) { }
     }
 
     /// <summary>
