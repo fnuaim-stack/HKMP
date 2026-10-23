@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../HKMP/Networking/Packet/IPacketData.cs" Link="IPacketData.cs" />
+    <Compile Include="../../HKMP/Networking/Packet/Data/SliceData.cs" Link="SliceData.cs" />
+    <Compile Include="../../HKMP/Networking/Packet/Data/SliceAckData.cs" Link="SliceAckData.cs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,31 @@
+name: Gameplay network smoke tests
+
+on:
+  push:
+    branches: [master, coop-gameplay-stability]
+    paths:
+      - 'tests/packet-smoke/**'
+      - 'HKMP/Networking/Packet/Data/SliceData.cs'
+      - 'HKMP/Networking/Packet/Data/SliceAckData.cs'
+      - '.github/workflows/gameplay-smoke.yml'
+  pull_request:
+    paths:
+      - 'tests/packet-smoke/**'
+      - 'HKMP/Networking/Packet/Data/SliceData.cs'
+      - 'HKMP/Networking/Packet/Data/SliceAckData.cs'
+      - '.github/workflows/gameplay-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  packet-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile and run packet serialization regressions
+        run: dotnet run --project tests/packet-smoke/PacketSmoke.csproj --configuration Release
