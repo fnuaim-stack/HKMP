@@ -57,9 +57,37 @@ internal class CopySaveCommand : IServerCommand {
             return;
         }
 
-        var toCopyData = new Dictionary<ushort, byte[]>(_serverSaveData.PlayerSaveData[fromPlayer.AuthKey]);
+        if (fromPlayer.AuthKey == toPlayer.AuthKey) {
+            commandSender.SendMessage("Source and destination are the same player");
+            return;
+        }
 
-        _serverSaveData.PlayerSaveData[toPlayer.AuthKey] = toCopyData;
+        if (!_serverSaveData.PlayerSaveData.TryGetValue(fromPlayer.AuthKey, out var sourceData)) {
+            commandSender.SendMessage($"Player '{fromUsername}' has no server-side progression to copy yet");
+            return;
+        }
+
+        // Make an independent snapshot of the source player's progression.
+        var copiedData = new Dictionary<ushort, byte[]>(sourceData.Count);
+        foreach (var entry in sourceData) {
+            copiedData[entry.Key] = entry.Value == null ? null : (byte[]) entry.Value.Clone();
+        }
+
+        _serverSaveData.PlayerSaveData.TryGetValue(toPlayer.AuthKey, out var previousData);
+        _serverSaveData.PlayerSaveData[toPlayer.AuthKey] = copiedData;
+
+        // A standalone server must flush this change before disconnecting the
+        // target; unlike a normal SaveUpdate, no packet will trigger a write.
+        if (!_serverManager.PersistSaveData()) {
+            if (previousData == null) {
+                _serverSaveData.PlayerSaveData.Remove(toPlayer.AuthKey);
+            } else {
+                _serverSaveData.PlayerSaveData[toPlayer.AuthKey] = previousData;
+            }
+
+            commandSender.SendMessage("Could not persist copied save; previous progression was preserved");
+            return;
+        }
 
         _serverManager.DisconnectPlayer(toPlayer.Id, DisconnectReason.Kicked);
         

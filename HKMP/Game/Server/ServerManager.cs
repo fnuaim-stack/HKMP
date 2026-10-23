@@ -1125,6 +1125,15 @@ internal abstract class ServerManager : IServerManager {
     }
 
     /// <summary>
+    /// Persist progression changes made outside normal SaveUpdate packets (for example /copysave).
+    /// For an in-game host, data remains in memory; dedicated servers override this for disk storage.
+    /// </summary>
+    /// <returns>Whether the change is stored by this server.</returns>
+    public virtual bool PersistSaveData() {
+        return true;
+    }
+
+    /// <summary>
     /// Callback method for when a player dies. 
     /// </summary>
     /// <param name="id">The ID of the player.</param>
@@ -1139,7 +1148,11 @@ internal abstract class ServerManager : IServerManager {
         if (ServerSaveData.IsSteelSoul()) {
             // We are running a Steel Soul save file, so we wipe the player-specific data for the player
             ServerSaveData.PlayerSaveData.Remove(playerData.AuthKey);
-            
+
+            if (!PersistSaveData()) {
+                Logger.Error("Could not persist Steel Soul player deletion");
+            }
+
             Logger.Info("  Wiped player save data (Steel Soul)");
         }
 
