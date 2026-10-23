@@ -1,0 +1,31 @@
+name: Full repository C# source syntax
+
+on:
+  push:
+    branches: [master, full-source-sanity]
+    paths:
+      - 'HKMP/**/*.cs'
+      - 'HKMPServer/**/*.cs'
+      - 'tests/source-syntax/**'
+      - '.github/workflows/source-syntax.yml'
+  pull_request:
+    paths:
+      - 'HKMP/**/*.cs'
+      - 'HKMPServer/**/*.cs'
+      - 'tests/source-syntax/**'
+      - '.github/workflows/source-syntax.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Parse all HKMP and HKMPServer C# source with Roslyn
+        run: dotnet run --project tests/source-syntax/SourceSyntax.csproj -c Release -- .
