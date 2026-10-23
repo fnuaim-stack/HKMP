@@ -12,6 +12,7 @@ using Hkmp.Networking.Server;
 using HkmpServer.Command;
 using HkmpServer.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace HkmpServer {
     /// <summary>
@@ -181,6 +182,14 @@ namespace HkmpServer {
             lock (_saveFileLock) {
                 try {
                     var saveFileText = File.ReadAllText(filePath);
+
+                    // A syntactically valid but truncated JSON object (such as "{}")
+                    // must not deserialize to an empty default world and erase progress.
+                    var saveJson = JObject.Parse(saveFileText);
+                    if (saveJson["global_save_data"] == null || saveJson["playerSaveData"] == null) {
+                        throw new InvalidDataException("Save file is missing required progression data");
+                    }
+
                     var consoleSaveFile = JsonConvert.DeserializeObject<ConsoleSaveFile>(saveFileText);
                     if (consoleSaveFile == null) {
                         throw new InvalidDataException("Save file was empty");
