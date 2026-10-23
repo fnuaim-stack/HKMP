@@ -65,11 +65,19 @@ internal class SliceData : IPacketData {
         var encodedNumSlices = packet.ReadByte();
         NumSlices = (ushort) (encodedNumSlices + 1);
 
+        if (SliceId >= NumSlices) {
+            throw new ArgumentOutOfRangeException(nameof(SliceId));
+        }
+
         ushort length;
         if (SliceId == NumSlices - 1) {
             length = packet.ReadUShort();
         } else {
             length = ConnectionManager.MaxSliceSize;
+        }
+
+        if (length == 0 || length > ConnectionManager.MaxSliceSize) {
+            throw new ArgumentOutOfRangeException(nameof(length));
         }
 
         Data = new byte[length];
