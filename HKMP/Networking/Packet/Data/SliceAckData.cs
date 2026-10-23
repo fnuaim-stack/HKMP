@@ -42,7 +42,7 @@ internal class SliceAckData : IPacketData {
             packet.Write(CreateAckFlag(currentIndex, currentIndex + 8, Acked));
             // Continue while loop if we need to write another flag, namely when the new starting index is smaller
             // than the number of slices
-        } while ((currentIndex += 8) < NumSlices);
+        } while ((currentIndex += 8) <= NumSlices);
     }
 
     /// <inheritdoc />
@@ -62,7 +62,7 @@ internal class SliceAckData : IPacketData {
             ReadAckFlag(flag, currentIndex, currentIndex + 8, ref acked);
             // Continue while loop if we need to read another flag, namely when the new starting index is smaller
             // than the number of slices
-        } while ((currentIndex += 8) < NumSlices);
+        } while ((currentIndex += 8) <= NumSlices);
 
         Acked = acked;
     }

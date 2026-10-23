@@ -59,7 +59,9 @@ internal static class Program {
         var packet = new MemoryPacket();
         original.WriteData(packet);
         byte[] bytes = packet.ToArray();
-        Assert(bytes.Length == 2 + (count + 7) / 8, $"no extra ack flag for {count} slices");
+        // Keep the original one-byte padding when count is divisible by 8.
+        // Deployed HKMP receivers expect this exact packet size.
+        Assert(bytes.Length == 3 + count / 8, $"legacy ACK wire size for {count} slices");
 
         var roundTrip = new SliceAckData();
         roundTrip.ReadData(new MemoryPacket(bytes));
