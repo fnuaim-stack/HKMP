@@ -72,8 +72,58 @@ internal static class Program {
         }
     }
 
+    private static void LegacyWireFormatGoldenVectors() {
+        // These are the exact byte layouts of the unmodified upstream
+        // Extremelyd1/HKMP master WriteData implementations (f7c35d96).
+        // They detect silent changes to chunk/ACK field order or the
+        // legacy extra padding flag for ACKs of 8, 16, ... 256 slices.
+        var oneSlice = new SliceData {
+            ChunkId = 7, SliceId = 0, NumSlices = 1,
+            Data = new byte[] { 0xAA, 0xBB }
+        };
+        var oneBytes = new MemoryPacket();
+        oneSlice.WriteData(oneBytes);
+        Assert(oneBytes.ToArray().AsSpan().SequenceEqual(
+            new byte[] { 7, 0, 0, 2, 0, 0xAA, 0xBB }),
+            "legacy single-slice wire bytes");
+
+        var finalOf256 = new SliceData {
+            ChunkId = 7, SliceId = 255, NumSlices = 256,
+            Data = new byte[] { 0xEF }
+        };
+        var lastBytes = new MemoryPacket();
+        finalOf256.WriteData(lastBytes);
+        Assert(lastBytes.ToArray().AsSpan().SequenceEqual(
+            new byte[] { 7, 255, 255, 1, 0, 0xEF }),
+            "legacy 256-slice final slice uses encoded count 255");
+
+        var flags = new bool[8];
+        flags[0] = true;
+        flags[7] = true;
+        var eightAck = new MemoryPacket();
+        new SliceAckData { ChunkId = 5, NumSlices = 8, Acked = flags }
+            .WriteData(eightAck);
+        Assert(eightAck.ToArray().AsSpan().SequenceEqual(
+            new byte[] { 5, 7, 0x81, 0 }),
+            "legacy eight-slice ACK padding flag preserved");
+
+        var maxFlags = new bool[256];
+        maxFlags[0] = true;
+        maxFlags[255] = true;
+        var maxAck = new MemoryPacket();
+        new SliceAckData { ChunkId = 5, NumSlices = 256, Acked = maxFlags }
+            .WriteData(maxAck);
+        var serialized = maxAck.ToArray();
+        Assert(serialized.Length == 35, "legacy 256-slice ACK has 32 flags plus one padding");
+        Assert(serialized[0] == 5 && serialized[1] == 255 &&
+               serialized[2] == 1 && serialized[33] == 0x80 &&
+               serialized[34] == 0,
+               "legacy 256-slice ACK flag positions");
+    }
+
     private static int Main() {
         try {
+            LegacyWireFormatGoldenVectors();
             SliceRoundTrip(1, 0, 16);
             SliceRoundTrip(2, 0, 1024);
             SliceRoundTrip(2, 1, 1);
