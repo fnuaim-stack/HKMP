@@ -104,7 +104,7 @@ internal class SliceAckData : IPacketData {
         byte currentValue = 1;
 
         for (var i = startIndex; i < endIndex; i++) {
-            if ((flag & currentValue) != 0) {
+            if (i < acked.Length && i < endIndex && (flag & currentValue) != 0) {
                 acked[i] = true;
             }
 
