@@ -105,8 +105,13 @@ namespace HkmpServer {
         protected override void OnSaveUpdate(ushort id, SaveUpdate packet) {
             base.OnSaveUpdate(id, packet);
 
-            // After the server manager has processed the save update, we write the current save data to file
-            WriteToSaveFile(ServerSaveData);
+            // After the server manager has processed the save update, flush disk state.
+            PersistSaveData();
+        }
+
+        /// <inheritdoc />
+        public override bool PersistSaveData() {
+            return WriteToSaveFile(ServerSaveData);
         }
 
         /// <summary>
@@ -160,7 +165,9 @@ namespace HkmpServer {
                 // Keep the constructor-owned save instance: commands retain a reference to it.
                 ServerSaveData.GlobalSaveData.Clear();
                 ServerSaveData.PlayerSaveData.Clear();
-                WriteToSaveFile(ServerSaveData);
+                if (!WriteToSaveFile(ServerSaveData)) {
+                    throw new IOException("Could not initialize dedicated-server save file");
+                }
             }
         }
 
@@ -214,7 +221,7 @@ namespace HkmpServer {
         /// Write the save data from the server to the save file.
         /// </summary>
         /// <param name="serverSaveData">The save data from the server to write to file.</param>
-        private void WriteToSaveFile(ServerSaveData serverSaveData) {
+        private bool WriteToSaveFile(ServerSaveData serverSaveData) {
             lock (_saveFileLock) {
                 try {
                     var consoleSaveFile = ConsoleSaveFile.FromServerSaveData(serverSaveData);
@@ -229,8 +236,11 @@ namespace HkmpServer {
                     } else {
                         File.Move(temporaryPath, _saveFilePath);
                     }
+
+                    return true;
                 } catch (Exception e) {
                     Logger.Error($"Exception occurred while serializing/writing to save file:\n{e}");
+                    return false;
                 }
             }
         }

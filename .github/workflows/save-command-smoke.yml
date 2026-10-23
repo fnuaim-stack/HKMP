@@ -1,0 +1,28 @@
+name: Progression save command smoke
+
+on:
+  push:
+    branches: [master, save-progression-fixes]
+    paths:
+      - 'tests/save-command-smoke/**'
+      - 'HKMP/Game/Command/Server/CopySaveCommand.cs'
+      - '.github/workflows/save-command-smoke.yml'
+  pull_request:
+    paths:
+      - 'tests/save-command-smoke/**'
+      - 'HKMP/Game/Command/Server/CopySaveCommand.cs'
+      - '.github/workflows/save-command-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile linked production /copysave and run isolated progression tests
+        run: dotnet run --project tests/save-command-smoke/SaveCommandSmoke.csproj -c Release
