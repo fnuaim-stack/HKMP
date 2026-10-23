@@ -792,6 +792,11 @@ internal abstract class ServerManager : IServerManager {
             Logger.Warn($"Received EntityUpdate data, but player with ID {id} is not in mapping");
             return;
         }
+
+        // The scene host alone simulates enemy movement and animation.
+        if (!playerData.IsSceneHost) {
+            return;
+        }
         
         // Create the key for the entity data
         var serverEntityKey = new ServerEntityKey(
@@ -882,7 +887,7 @@ internal abstract class ServerManager : IServerManager {
             _entityData[serverEntityKey] = entityData;
         }
         
-        if (entityUpdate.UpdateTypes.Contains(EntityUpdateType.Active)) {
+        if (playerData.IsSceneHost && entityUpdate.UpdateTypes.Contains(EntityUpdateType.Active)) {
             SendDataInSameScene(
                 id,
                 playerData.CurrentScene,
@@ -930,7 +935,7 @@ internal abstract class ServerManager : IServerManager {
             }
         }
 
-        if (entityUpdate.UpdateTypes.Contains(EntityUpdateType.HostFsm)) {
+        if (playerData.IsSceneHost && entityUpdate.UpdateTypes.Contains(EntityUpdateType.HostFsm)) {
             foreach (var pair in entityUpdate.HostFsmData) {
                 var fsmIndex = pair.Key;
                 var data = pair.Value;

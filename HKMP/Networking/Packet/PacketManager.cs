@@ -769,7 +769,7 @@ internal class PacketManager {
         var addonPacketIdMessage = $"for addon ID {addonId} and packet ID {packetId}";
         var noHandlerWarningMessage =
             $"There is no server addon connection packet handler registered {addonPacketIdMessage}";
-        if (!_serverAddonUpdatePacketHandlers.TryGetValue(addonId, out var addonPacketHandlers)) {
+        if (!_serverAddonConnectionPacketHandlers.TryGetValue(addonId, out var addonPacketHandlers)) {
             Logger.Warn(noHandlerWarningMessage);
             return;
         }
@@ -921,6 +921,11 @@ internal class PacketManager {
             // If there is still 2 bytes to read in the data, it represents the next packet's length
             var packetLength = 0;
             var unreadDataLength = data.Length - readIndex;
+            if (unreadDataLength == 1) {
+                // Preserve a partial length prefix across receives.
+                leftover = new[] { data[readIndex] };
+                break;
+            }
             if (unreadDataLength > 1) {
                 packetLength = BitConverter.ToUInt16(data, readIndex);
                 readIndex += 2;

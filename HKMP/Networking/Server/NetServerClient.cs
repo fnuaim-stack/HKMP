@@ -30,6 +30,11 @@ internal class NetServerClient {
     /// Whether the client is registered.
     /// </summary>
     public bool IsRegistered { get; set; }
+
+    /// <summary>
+    /// Incomplete packet bytes belonging to this connection only.
+    /// </summary>
+    public byte[] LeftoverData;
     
     /// <summary>
     /// The update manager for the client.

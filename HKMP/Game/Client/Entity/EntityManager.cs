@@ -179,7 +179,11 @@ internal class EntityManager {
         }.Process();
 
         if (!processor.Success) {
-            Logger.Warn($"Could not process game object of spawned entity: {spawnedObject.name}");
+            Logger.Warn($"Could not process game object of spawned entity: {spawnedObject?.name ?? "null"}");
+        } else {
+            // A pending update may have arrived before this newly spawned entity.
+            // Apply it as soon as the entity is successfully registered.
+            CheckReceivedUpdates();
         }
     }
     
@@ -326,24 +330,30 @@ internal class EntityManager {
     /// Check to see if there are received un-applied entity updates.
     /// </summary>
     private void CheckReceivedUpdates() {
-        while (_receivedUpdates.Count != 0) {
-            var update = _receivedUpdates.Peek();
-            
-            if (_entities.TryGetValue(update.Id, out _)) {
-                Logger.Debug("Found un-applied entity update, applying now");
+        // A scene host must be known before we can apply networked entity state.
+        if (!IsSceneHostDetermined) {
+            return;
+        }
 
-                bool handled;
-                if (update is EntityUpdate entityUpdate) {
-                    handled = HandleEntityUpdate(entityUpdate);
-                } else if (update is ReliableEntityUpdate reliableEntityUpdate) {
-                    handled = HandleReliableEntityUpdate(reliableEntityUpdate);
-                } else {
-                    continue;
-                }
+        // Missing entities are normal during scene loading. Never spin on the first
+        // unresolved item, and never process new items added during this pass.
+        var pendingCount = _receivedUpdates.Count;
+        for (var i = 0; i < pendingCount; i++) {
+            var update = _receivedUpdates.Dequeue();
 
-                if (handled) {
-                    _receivedUpdates.Dequeue();
-                }
+            if (!_entities.ContainsKey(update.Id)) {
+                _receivedUpdates.Enqueue(update);
+                continue;
+            }
+
+            Logger.Debug("Found un-applied entity update, applying now");
+
+            if (update is EntityUpdate entityUpdate) {
+                HandleEntityUpdate(entityUpdate);
+            } else if (update is ReliableEntityUpdate reliableEntityUpdate) {
+                HandleReliableEntityUpdate(reliableEntityUpdate);
+            } else {
+                Logger.Warn("Discarding unknown pending entity update type");
             }
         }
     }

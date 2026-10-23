@@ -1,0 +1,58 @@
+name: Package HKMP co-op prerelease
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: "Successful .NET CI push run ID for this exact master commit"
+        required: true
+        type: string
+      tag:
+        description: "Prerelease tag (for example v3.0.0-coop-rc1)"
+        required: true
+        type: string
+        default: v3.0.0-coop-rc1
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/master'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate build run provenance
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+        run: |
+          $build = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:BUILD_RUN_ID" | ConvertFrom-Json
+          if ($build.head_sha -ne $env:GITHUB_SHA) { throw "Build does not match current master SHA" }
+          if ($build.conclusion -ne 'success' -or $build.name -ne '.NET CI' -or $build.event -ne 'push') {
+            throw "Build must be a successful trusted push .NET CI run, not $($build.name) / $($build.conclusion)"
+          }
+      - name: Download verified client and server artifacts
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+        run: |
+          gh run download "$env:BUILD_RUN_ID" --repo "$env:GITHUB_REPOSITORY" --name HKMP --dir artifacts/HKMP
+          gh run download "$env:BUILD_RUN_ID" --repo "$env:GITHUB_REPOSITORY" --name HKMPServer --dir artifacts/HKMPServer
+      - name: Package builds and create checksums
+        shell: pwsh
+        run: |
+          ./scripts/package-release.ps1 -ClientDir artifacts/HKMP -ServerDir artifacts/HKMPServer -OutputDir dist -SourceCommit "$env:GITHUB_SHA" -Version "${{ inputs.tag }}"
+      - name: Publish explicitly unverified-gameplay prerelease
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag="${{ inputs.tag }}"
+          if ($tag -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+-[a-z0-9.-]*rc[0-9]+$') { throw "Only RC prerelease tags are allowed" }
+          $prior = gh release view "$tag" --repo "$env:GITHUB_REPOSITORY" 2>$null
+          if ($LASTEXITCODE -eq 0) { throw "Release $tag exists: do not silently replace it" }
+          gh release create "$tag" "dist/HKMP-client-$tag.zip" "dist/HKMP-server-$tag.zip" "dist/SHA256SUMS.txt" --repo "$env:GITHUB_REPOSITORY" --target "$env:GITHUB_SHA" --prerelease --title "HKMP co-op $tag (candidate)" --notes "Source: $env:GITHUB_SHA. Full .NET CI passed for this commit. Packet serialization smoke tests are available. Gameplay, bosses, save rejoin and progression have NOT been verified with two Hollow Knight clients. Use backed-up test saves only. Fork of Extremelyd1/HKMP (LGPL-2.1)."

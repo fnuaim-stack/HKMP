@@ -1,5 +1,7 @@
 # HKMP <img src="https://files.catbox.moe/x2wnhc.svg" width="52" align="right">
 
+> **Development fork — experimental.** This repository contains additional multiplayer stability and dedicated-save fixes built on [Extremelyd1/HKMP](https://github.com/Extremelyd1/HKMP). Packet tests have passed, but a complete updated client/server build and two-client gameplay validation are not yet confirmed. Use backed-up test saves only. See [build instructions](BUILD_AND_RELEASE.md), [known issues and QA](GAMEPLAY_QA.md), and [packaging](RELEASE_PACKAGING.md). **Full Synchronisation is off by default**; enable it on the host/server for enemy, world and progress sync. Any fork prerelease must include both client and server runtime dependencies.
+
 ## What is Hollow Knight Multiplayer?
 As the name might suggest, Hollow Knight Multiplayer (HKMP) is a multiplayer mod for the popular 2D action-adventure game Hollow Knight.
 The main purpose of this mod is to allow people to host games and let others join them in their adventures.

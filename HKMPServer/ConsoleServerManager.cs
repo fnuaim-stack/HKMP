@@ -12,6 +12,7 @@ using Hkmp.Networking.Server;
 using HkmpServer.Command;
 using HkmpServer.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace HkmpServer {
     /// <summary>
@@ -76,9 +77,10 @@ namespace HkmpServer {
 
         /// <inheritdoc />
         public override void Start(int port, bool fullSynchronisation) {
-            base.Start(port, fullSynchronisation);
-            
+            // Load persistent progress before accepting any network clients.
+            // A corrupt save must not start a fresh shared world.
             InitializeSaveFile();
+            base.Start(port, fullSynchronisation);
         }
 
         /// <inheritdoc />
@@ -128,16 +130,47 @@ namespace HkmpServer {
             lock (_saveFileLock) {
                 _saveFilePath = Path.Combine(currentPath, SaveFileName);
 
-                // If the file exists, simply read it into the current save data for the server
-                // Otherwise, create an empty dictionary for save data and save it to file
-                if (File.Exists(_saveFilePath) && TryReadSaveFile(out var saveData)) {
-                    ServerSaveData = saveData;
-                } else {
-                    ServerSaveData = new ServerSaveData();
-
-                    WriteToSaveFile(ServerSaveData);
+                var backupPath = _saveFilePath + ".bak";
+                if (File.Exists(_saveFilePath) && TryReadSaveFile(_saveFilePath, out var saveData)) {
+                    ApplyLoadedSaveData(saveData);
+                    return;
                 }
+
+                if (File.Exists(backupPath) && TryReadSaveFile(backupPath, out var backupData)) {
+                    Logger.Warn("Primary save unavailable or unreadable; restoring backup save data");
+
+                    // Do not let the next successful write replace the good backup
+                    // with a corrupt primary. Quarantine the unreadable file instead.
+                    if (File.Exists(_saveFilePath)) {
+                        var corruptPath = _saveFilePath + ".corrupt-" + Guid.NewGuid().ToString("N");
+                        File.Move(_saveFilePath, corruptPath);
+                        Logger.Warn($"Preserved unreadable save file at {corruptPath}");
+                    }
+
+                    ApplyLoadedSaveData(backupData);
+                    return;
+                }
+
+                // Never erase progress because an existing save failed to deserialize.
+                if (File.Exists(_saveFilePath) || File.Exists(backupPath)) {
+                    throw new InvalidDataException(
+                        "Existing server save files are unreadable. Refusing to overwrite progress.");
+                }
+
+                // Keep the constructor-owned save instance: commands retain a reference to it.
+                ServerSaveData.GlobalSaveData.Clear();
+                ServerSaveData.PlayerSaveData.Clear();
+                WriteToSaveFile(ServerSaveData);
             }
+        }
+
+        /// <summary>
+        /// Apply an existing save without replacing the server's save-data object.
+        /// Server commands, including /copysave, retain a reference to this instance.
+        /// </summary>
+        private void ApplyLoadedSaveData(ServerSaveData loadedData) {
+            ServerSaveData.GlobalSaveData = loadedData.GlobalSaveData;
+            ServerSaveData.PlayerSaveData = loadedData.PlayerSaveData;
         }
 
         /// <summary>
@@ -145,18 +178,31 @@ namespace HkmpServer {
         /// </summary>
         /// <param name="serverSaveData">The server save data instance if it was read, otherwise null.</param>
         /// <returns>true if the save file could be read, false otherwise.</returns>
-        private bool TryReadSaveFile(out ServerSaveData serverSaveData) {
+        private bool TryReadSaveFile(string filePath, out ServerSaveData serverSaveData) {
             lock (_saveFileLock) {
-                // Read the JSON text from the file
-                var saveFileText = File.ReadAllText(_saveFilePath);
-
                 try {
+                    var saveFileText = File.ReadAllText(filePath);
+
+                    // A syntactically valid but truncated JSON object (such as "{}")
+                    // must not deserialize to an empty default world and erase progress.
+                    var saveJson = JObject.Parse(saveFileText);
+                    if (saveJson["global_save_data"] == null || saveJson["playerSaveData"] == null) {
+                        throw new InvalidDataException("Save file is missing required progression data");
+                    }
+
                     var consoleSaveFile = JsonConvert.DeserializeObject<ConsoleSaveFile>(saveFileText);
+                    if (consoleSaveFile == null) {
+                        throw new InvalidDataException("Save file was empty");
+                    }
 
                     serverSaveData = consoleSaveFile.ToServerSaveData();
+                    if (serverSaveData == null) {
+                        throw new InvalidDataException("Save file could not be decoded");
+                    }
+
                     return true;
                 } catch (Exception e) {
-                    Logger.Error($"Could not read the JSON from save file:\n{e}");
+                    Logger.Error($"Could not load save file {filePath}:\n{e}");
                 }
 
                 serverSaveData = null;
@@ -174,7 +220,15 @@ namespace HkmpServer {
                     var consoleSaveFile = ConsoleSaveFile.FromServerSaveData(serverSaveData);
                     var saveFileText = JsonConvert.SerializeObject(consoleSaveFile, Formatting.Indented);
 
-                    File.WriteAllText(_saveFilePath, saveFileText);
+                    // Write a complete temp file before replacing the old save.
+                    // File.Replace keeps the previous valid save in a .bak file.
+                    var temporaryPath = _saveFilePath + ".tmp";
+                    File.WriteAllText(temporaryPath, saveFileText);
+                    if (File.Exists(_saveFilePath)) {
+                        File.Replace(temporaryPath, _saveFilePath, _saveFilePath + ".bak");
+                    } else {
+                        File.Move(temporaryPath, _saveFilePath);
+                    }
                 } catch (Exception e) {
                     Logger.Error($"Exception occurred while serializing/writing to save file:\n{e}");
                 }
