@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../HKMP/Networking/Chunk/ChunkSender.cs" Link="ChunkSender.cs" />
+    <Compile Include="../../HKMP/Networking/Chunk/ChunkReceiver.cs" Link="ChunkReceiver.cs" />
+    <Compile Include="../../HKMP/Networking/Packet/Data/SliceData.cs" Link="SliceData.cs" />
+    <Compile Include="../../HKMP/Networking/Packet/Data/SliceAckData.cs" Link="SliceAckData.cs" />
+    <Compile Include="../../HKMP/Networking/Packet/IPacketData.cs" Link="IPacketData.cs" />
+  </ItemGroup>
+</Project>

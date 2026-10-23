@@ -12,6 +12,8 @@ This fork extends [Extremelyd1/HKMP](https://github.com/Extremelyd1/HKMP). Follo
 
 ## Repository commands
 - Run game-independent packet regressions: `dotnet run --project tests/packet-smoke/PacketSmoke.csproj -c Release`
+- Run production sender/receiver transport regressions: `dotnet run --project tests/chunk-transport/ChunkTransport.csproj -c Release`
+- Run save-command regressions: `dotnet run --project tests/save-command-smoke/SaveCommandSmoke.csproj -c Release`
 - Full game build (requires locally installed Hollow Knight/Modding API DLLs): `dotnet build HKMP.sln -c Release`
 - See `BUILD_AND_RELEASE.md`, `GAMEPLAY_QA.md`, `BUGS.md`, and `RELEASE_PACKAGING.md`.
 - Release packaging uses `scripts/package-release.ps1` and refuses to package missing runtime dependencies.

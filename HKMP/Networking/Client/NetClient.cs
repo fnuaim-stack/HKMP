@@ -168,7 +168,10 @@ internal class NetClient : INetClient {
         
         _chunkSender.Stop();
         _chunkReceiver.Reset();
-        
+        // A partial frame belongs to the previous DTLS session, not to a
+        // future server after reconnecting.
+        _leftoverData = null;
+
         _dtlsClient.Disconnect();
 
         ConnectionStatus = ClientConnectionStatus.NotConnected;
@@ -262,10 +265,10 @@ internal class NetClient : INetClient {
             throw new NotImplementedException("Unknown connection result in server info");
         }
         
-        UpdateManager?.StopUpdates();
+        // Rejected logins must fully close the DTLS/packet state just like
+        // timeouts and socket errors, otherwise a later join reuses stale data.
+        Disconnect();
 
-        ConnectionStatus = ClientConnectionStatus.NotConnected;
-        
         // Invoke callback if it exists on the main thread of Unity
         ThreadUtil.RunActionOnMainThread(() => { ConnectFailedEvent?.Invoke(result); });
     }
