@@ -89,8 +89,9 @@ internal abstract class ChunkReceiver {
         } else {
             // If the received number of slices does not match the number slices we are keeping track of, we discard
             // the slice altogether as it is likely not correct
-            if (_numSlices != sliceData.NumSlices) {
-                //Logger.Debug("Number of slices in slice packet does not correspond with local number of slices");
+            // In-flight slices must belong to the current chunk. A delayed
+            // or future chunk with the same slice count must never corrupt it.
+            if (sliceData.ChunkId != _chunkId || _numSlices != sliceData.NumSlices) {
                 return;
             }
         }
