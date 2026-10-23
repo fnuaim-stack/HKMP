@@ -14,7 +14,7 @@ Fork of [Extremelyd1/HKMP](https://github.com/Extremelyd1/HKMP). Gameplay review
 | Network framing | Fragments from multiple connections can be mixed | Per-client leftover packet state | Needs 2+ clients |
 | Network framing | Split 2-byte length prefix is dropped | Preserve a one-byte remainder | Needs segmented-packet regression |
 | Chunk transfer | Invalid slice IDs or lengths | Reject malformed slices before applying | Production packet serializer smoke tests passed |
-| Dedicated saves | Corrupted save can be overwritten with empty progress | Backup recovery, quarantine of unreadable primary, and atomic replacement | Needs save recovery test |
+| Dedicated saves | Corrupted save can be overwritten with empty progress | Backup recovery, quarantine of unreadable primary, and atomic replacement | Windows/Linux headless file-recovery tests passed with stubbed game codecs; real-game save test still required |
 | Consecutive connection chunks | ACK flags and slice index reused from previous packet | Reset per-chunk state; skip invalid-sized packets without keeping sender busy | Production sender/receiver headless CI passed; game untested |
 | In-flight chunk corruption | A later chunk's slice with the same count could be accepted into the current one | Enforce current chunk ID during assembly | Future-slice injection headless CI passed; game untested |
 | Reconnect after rejection | Failed server handshake kept DTLS and packet framing state alive; queued old chunks survived Stop | Fully disconnect failed login, clear partial frames and stale outgoing queue | Source-reviewed; needs actual login/reconnect test |

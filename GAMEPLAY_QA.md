@@ -34,6 +34,7 @@ This manual checklist is **not executed**. Based on Co-op Anything's coop-revive
 
 - [ ] Both C# projects compile in Release configuration with required game and Modding API assemblies
 - [ ] Regression tests exist for queue processing, packet splitting, add-on dispatch and save recovery
+- [x] Production dedicated-server file recovery tested headlessly on Windows/Linux (stubbed game codec; not a game runtime test)
 - [x] Headless production sender/receiver test covers consecutive chunks, 256 slices, ACK reset and foreign-slice rejection (not in-game validation)
 - [ ] Two-client co-op playthrough completed in normal conditions
 - [ ] Boss, progression and NPC scenarios tested after reconnect and restart

@@ -1,0 +1,34 @@
+name: Dedicated server save recovery regression
+
+on:
+  push:
+    branches: [master, server-save-regressions]
+    paths:
+      - 'HKMPServer/ConsoleServerManager.cs'
+      - 'HKMPServer/ConsoleSaveFile.cs'
+      - 'tests/server-save-smoke/**'
+      - '.github/workflows/server-save-smoke.yml'
+  pull_request:
+    paths:
+      - 'HKMPServer/ConsoleServerManager.cs'
+      - 'HKMPServer/ConsoleSaveFile.cs'
+      - 'tests/server-save-smoke/**'
+      - '.github/workflows/server-save-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-save:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run production dedicated-server persistence with temporary test data
+        run: dotnet run --project tests/server-save-smoke/ServerSaveSmoke.csproj -c Release
