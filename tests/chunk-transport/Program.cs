@@ -138,7 +138,20 @@ internal static class Program {
         Check(completed, "stop clears queued old-connection handshake data");
     }
 
+    private static void TestImmediateStartStop() {
+        // Connection rejection and timeouts can occur before the sender thread
+        // receives CPU time. The sender must never dereference a shared
+        // CancellationTokenSource that Stop() has already cleared.
+        for (var i = 0; i < 100; i++) {
+            var sender = new TestSender();
+            sender.Start();
+            sender.Stop();
+        }
+        Check(true, "100 immediate start/stop cycles completed without sender thread exception");
+    }
+
     private static void Main() {
+        TestImmediateStartStop();
         TestStopClearsPreviousConnectionQueue();
         TestMultipleChunksAndForeignSlice();
         Console.WriteLine($"PASS: {_checks} real sender/receiver chunk-transfer checks");
