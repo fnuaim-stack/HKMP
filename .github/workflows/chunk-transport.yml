@@ -1,0 +1,35 @@
+name: Co-op chunk transport regression
+
+on:
+  push:
+    branches: [master, core-connection-regressions]
+    paths:
+      - 'HKMP/Networking/Chunk/ChunkSender.cs'
+      - 'HKMP/Networking/Chunk/ChunkReceiver.cs'
+      - 'HKMP/Networking/Packet/Data/SliceData.cs'
+      - 'HKMP/Networking/Packet/Data/SliceAckData.cs'
+      - 'tests/chunk-transport/**'
+      - '.github/workflows/chunk-transport.yml'
+  pull_request:
+    paths:
+      - 'HKMP/Networking/Chunk/ChunkSender.cs'
+      - 'HKMP/Networking/Chunk/ChunkReceiver.cs'
+      - 'HKMP/Networking/Packet/Data/SliceData.cs'
+      - 'HKMP/Networking/Packet/Data/SliceAckData.cs'
+      - 'tests/chunk-transport/**'
+      - '.github/workflows/chunk-transport.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  chunks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run production chunk sender, receiver and serialization end to end
+        run: dotnet run --project tests/chunk-transport/ChunkTransport.csproj --configuration Release
