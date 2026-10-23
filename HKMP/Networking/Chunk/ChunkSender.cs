@@ -104,8 +104,12 @@ internal abstract class ChunkSender {
         _sendTaskTokenSource?.Cancel();
         _sendTaskTokenSource?.Dispose();
         _sendTaskTokenSource = new CancellationTokenSource();
-        
-        new Thread(() => StartSends(_sendTaskTokenSource.Token)).Start();
+
+        // Capture the token before creating the thread. Stop() may clear the
+        // shared field before the new thread is scheduled, so reading it from
+        // inside the thread can otherwise cause a NullReferenceException.
+        var cancellationToken = _sendTaskTokenSource.Token;
+        new Thread(() => StartSends(cancellationToken)).Start();
     }
 
     /// <summary>
