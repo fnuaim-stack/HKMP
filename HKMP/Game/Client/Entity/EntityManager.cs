@@ -179,7 +179,11 @@ internal class EntityManager {
         }.Process();
 
         if (!processor.Success) {
-            Logger.Warn($"Could not process game object of spawned entity: {spawnedObject.name}");
+            Logger.Warn($"Could not process game object of spawned entity: {spawnedObject?.name ?? "null"}");
+        } else {
+            // A pending update may have arrived before this newly spawned entity.
+            // Apply it as soon as the entity is successfully registered.
+            CheckReceivedUpdates();
         }
     }
     
