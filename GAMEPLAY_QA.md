@@ -26,11 +26,15 @@ This manual checklist is **not executed**. Based on Co-op Anything's coop-revive
 | Double corruption | Corrupt primary and backup in isolated test folder | Server refuses to start; no progress files overwritten |
 | Add-on connection | Register distinct connection and update handlers | Correct handler fires for each packet type |
 | Network loss | 100–250 ms artificial RTT and 1–5% packet loss | No permanent duplication, desync or freezes |
+| Multiple connection chunks | Send a 5+ slice connection packet followed by a smaller packet | Sender starts at slice zero, carries no previous ACKs, recipient receives both |
+| Login rejected then retry | Connect with incorrect add-on settings, then correct settings | Previous session shuts down; retry succeeds without ghost frames |
+| Sequential join/save chunks | Repeated joins and save transfers, including large data | No stuck 'connecting' screen or lost progress; all chunks complete |
 
 ## Before tagging a release
 
 - [ ] Both C# projects compile in Release configuration with required game and Modding API assemblies
 - [ ] Regression tests exist for queue processing, packet splitting, add-on dispatch and save recovery
+- [x] Headless production sender/receiver test covers consecutive chunks, 256 slices, ACK reset and foreign-slice rejection (not in-game validation)
 - [ ] Two-client co-op playthrough completed in normal conditions
 - [ ] Boss, progression and NPC scenarios tested after reconnect and restart
 - [ ] Test with latency and loss; inspect client/server logs
