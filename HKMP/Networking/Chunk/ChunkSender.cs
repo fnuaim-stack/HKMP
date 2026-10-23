@@ -210,8 +210,12 @@ internal abstract class ChunkSender {
 
             //Logger.Debug("Successfully taken new packet from blocking collection, starting networking chunk");
 
+            // ACK state and the current slice index belong to one chunk only.
+            // Keeping either between packets can hang a following smaller transfer.
             Array.Clear(_sliceStopwatches, 0, _sliceStopwatches.Length);
+            Array.Clear(_acked, 0, _acked.Length);
             _numAckedSlices = 0;
+            _currentSliceId = 0;
 
             var packetBytes = packet.ToArray();
 
@@ -223,9 +227,11 @@ internal abstract class ChunkSender {
 
             //Logger.Debug($"ChunkSize: {_chunkSize}, NumSlices: {_numSlices}");
 
-            // Skip over chunks that exceed the maximum size that our system can handle
-            if (_chunkSize > ConnectionManager.MaxChunkSize) {
-                Logger.Error($"Could not send packet that exceeds max chunk size: {_chunkSize}");
+            // The wire protocol cannot represent an empty slice or more than
+            // MaxSlicesPerChunk slices. Do not leave the sender marked as busy.
+            if (_chunkSize == 0 || _chunkSize > ConnectionManager.MaxChunkSize) {
+                Logger.Error($"Could not send packet with invalid chunk size: {_chunkSize}");
+                _isSending = false;
                 continue;
             }
 
