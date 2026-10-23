@@ -131,7 +131,7 @@ namespace HkmpServer {
 
                 var backupPath = _saveFilePath + ".bak";
                 if (File.Exists(_saveFilePath) && TryReadSaveFile(_saveFilePath, out var saveData)) {
-                    ServerSaveData = saveData;
+                    ApplyLoadedSaveData(saveData);
                     return;
                 }
 
@@ -146,7 +146,7 @@ namespace HkmpServer {
                         Logger.Warn($"Preserved unreadable save file at {corruptPath}");
                     }
 
-                    ServerSaveData = backupData;
+                    ApplyLoadedSaveData(backupData);
                     return;
                 }
 
@@ -156,9 +156,20 @@ namespace HkmpServer {
                         "Existing server save files are unreadable. Refusing to overwrite progress.");
                 }
 
-                ServerSaveData = new ServerSaveData();
+                // Keep the constructor-owned save instance: commands retain a reference to it.
+                ServerSaveData.GlobalSaveData.Clear();
+                ServerSaveData.PlayerSaveData.Clear();
                 WriteToSaveFile(ServerSaveData);
             }
+        }
+
+        /// <summary>
+        /// Apply an existing save without replacing the server's save-data object.
+        /// Server commands, including /copysave, retain a reference to this instance.
+        /// </summary>
+        private void ApplyLoadedSaveData(ServerSaveData loadedData) {
+            ServerSaveData.GlobalSaveData = loadedData.GlobalSaveData;
+            ServerSaveData.PlayerSaveData = loadedData.PlayerSaveData;
         }
 
         /// <summary>
