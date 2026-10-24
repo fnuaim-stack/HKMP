@@ -17,9 +17,9 @@ This fork extends [Extremelyd1/HKMP](https://github.com/Extremelyd1/HKMP). Follo
 - Run dedicated-server save-file recovery regressions: `dotnet run --project tests/server-save-smoke/ServerSaveSmoke.csproj -c Release`
 - Parse all C# sources for syntax without the game: `dotnet run --project tests/source-syntax/SourceSyntax.csproj -c Release -- .`
 - Full game build (requires locally installed Hollow Knight/Modding API DLLs): `dotnet build HKMP.sln -c Release`
-- See `BUILD_AND_RELEASE.md`, `GAMEPLAY_QA.md`, `BUGS.md`, and `RELEASE_PACKAGING.md`.
+- See `BUILD_AND_RELEASE.md` for building, version compatibility and packaging; `GAMEPLAY_QA.md` for gameplay verification, `BUGS.md` for open issues, and `tests/README.md` for regression test commands.
 - Release packaging uses `scripts/package-release.ps1` and refuses to package missing runtime dependencies.
-- Publish GitHub prereleases only from a **successful exact-commit full build** with both client and server artifacts, using `.github/workflows/release-candidate.yml`.
+- Publish prereleases only from a successful exact-commit build with matching client and server artifacts; use `.github/workflows/release-candidate.yml` when its trusted full-build CI is configured, otherwise retain separate local-build provenance and checksums.
 
 ## Verified versus unknown
 - The isolated production packet serialization smoke tests have passed in GitHub Actions.
