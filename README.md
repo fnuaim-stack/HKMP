@@ -1,6 +1,6 @@
 # HKMP <img src="https://files.catbox.moe/x2wnhc.svg" width="52" align="right">
 
-> **Development fork — experimental.** This repository contains additional multiplayer stability and dedicated-save fixes built on [Extremelyd1/HKMP](https://github.com/Extremelyd1/HKMP). Packet tests have passed, but a complete updated client/server build and two-client gameplay validation are not yet confirmed. Use backed-up test saves only. See [build instructions](BUILD_AND_RELEASE.md), [known issues and QA](GAMEPLAY_QA.md), and [packaging](RELEASE_PACKAGING.md). **Full Synchronisation is off by default**; enable it on the host/server for enemy, world and progress sync. Any fork prerelease must include both client and server runtime dependencies.
+> **Experimental co-op prerelease:** [Download the matching client and server v3.0.0-coop-rc1](https://github.com/fnuaim-stack/HKMP/releases/tag/v3.0.0-coop-rc1). Both binaries were built from the same source revision for Hollow Knight 1.5.78.11833 and passed headless checks. Two-client gameplay is still unverified; back up test saves. Enable **Full Synchronisation** on the host/server for world and progress sync. This fork builds on [Extremelyd1/HKMP](https://github.com/Extremelyd1/HKMP).
 
 ## What is Hollow Knight Multiplayer?
 As the name might suggest, Hollow Knight Multiplayer (HKMP) is a multiplayer mod for the popular 2D action-adventure game Hollow Knight.
@@ -11,24 +11,23 @@ Moreover, you can leave suggestions or bug reports. The latest announcements wil
 ## Install
 ### Quick start
 A [community-made guide](https://geroyuni.notion.site/HKMP-Hollow-Knight-Multiplayer-21723018c74c41d3bc555ee9cfaeb743) exists to get started easily with the mod.
-If you are not experienced with Github and/or Hollow Knight modding, this is the recommended way to start using the mod.
-Alternatively, the sections below illustrate how to get the mod from the installer or install it manually.
+The community guide covers HKMP generally. For this fork, use the matching client and server files from the prerelease linked above.
 
 ### Modding installer
-The latest version of the mod can be found on [Lumafly](https://github.com/themulhima/lumafly), a modding installer for Hollow Knight 1.5.
+The upstream version of the mod can be found on [Lumafly](https://github.com/themulhima/lumafly), a modding installer for Hollow Knight 1.5.
 Using [this link](https://themulhima.github.io/Lumafly?download) will automatically download the correct version of the Lumafly installer for your OS.
-This installer will then automatically download the modding API and you can install the mod via an easy-to-use interface.
+Use the installer to set up the Modding API. Then disable any other HKMP version and install this fork's prerelease manually so client and server match.
 
 ### Manual install
 The mod works through the [Hollow Knight Modding API](https://github.com/hk-modding/api).
-After installing the API, this mod can be installed by dropping the compiled DLL into your mods folder, which can be found in your Steam installation:
+After installing the API, copy `HKMP.dll` and `BouncyCastle.Cryptography.dll` from the [client ZIP](https://github.com/fnuaim-stack/HKMP/releases/download/v3.0.0-coop-rc1/HKMP-client-v3.0.0-coop-rc1.zip) into your mods folder, which can be found in your Steam installation:
 (Beware that these are the default locations. Your install may be on a different drive, in that case change your path accordingly.)
 
 - **Windows**: `C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods\`
 - **Mac**: `~/Library/Application Support/Steam/steamapps/common/Hollow Knight/hollow_knight.app/`, then click "open package contents" and `content -> resources -> data -> managed -> mods`
 - **Linux**: `~/.local/share/Steam/steamapps/common/Hollow Knight/hollow_knight_Data/Managed/Mods/`
 
-The latest version of the compiled DLL can be found on the [releases page](https://github.com/Extremelyd1/HKMP/releases).
+Use the matching [server ZIP](https://github.com/fnuaim-stack/HKMP/releases/download/v3.0.0-coop-rc1/HKMP-server-v3.0.0-coop-rc1.zip) if you want a standalone server.
 
 ## Usage
 The main interface of the mod can be found in the pause menu in-game.
@@ -79,7 +78,7 @@ the server or execute commands that require higher permission.
 
 ### Standalone server
 It is possible to run a standalone server on Windows, Linux and Mac.
-The latest executable of the server can be found on the [releases page](https://github.com/Extremelyd1/HKMP/releases).
+The matching executable and its dependencies are in the [server ZIP](https://github.com/fnuaim-stack/HKMP/releases/download/v3.0.0-coop-rc1/HKMP-server-v3.0.0-coop-rc1.zip). Extract the ZIP and run `HKMPServer.exe <port>` on Windows; the default port is `26950`. Set `FullSynchronisation` to `true` in the generated `consolesettings.json` before restarting for world and progress sync.
 For Linux and Mac, the server can be run with [Mono](https://www.mono-project.com) installed.
 After installing Mono, the same executable can be run using `mono HKMPServer.exe <port>`.
 Currently, the only command-line argument is the port that the server should be hosted on.

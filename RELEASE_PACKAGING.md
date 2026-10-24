@@ -1,6 +1,6 @@
 # Packaging HKMP and its dedicated server
 
-The Windows screenshots supplied by the owner show `HKMP.dll`, `HKMP.pdb`, `HKMP.xml` in one directory and `HKMPServer.exe`, `HKMPServer.pdb` in another. Those are **not sufficient to confirm a current, complete build**.
+The [v3.0.0-coop-rc1 prerelease](https://github.com/fnuaim-stack/HKMP/releases/tag/v3.0.0-coop-rc1) contains matching client and server builds, their runtime dependencies, license texts, and SHA-256 checksums. Build provenance and gameplay status are recorded on the release page.
 
 ## Runtime dependencies
 
@@ -20,6 +20,6 @@ The script fails when a required dependency is missing or when the server's and 
 
 `.github/workflows/release-candidate.yml` is a manually dispatched action intended for **master**. Given a successful `.NET CI` **push** build run ID for the same commit, it downloads the `HKMP` and `HKMPServer` build artifacts, packages them, checks SHA-256, and publishes a **prerelease**.
 
-The fork's current inherited full build cannot succeed because `DEPENDENCIES_ZIP_PASSPHRASE` is absent. Do not bypass the provenance check or republish upstream binaries as if built from this fork.
+The inherited CI full build cannot succeed because `DEPENDENCIES_ZIP_PASSPHRASE` is absent. The published prerelease was built and checked locally against private game references; the GitHub release automation was not used. Do not republish upstream binaries as if built from this fork.
 
 The independent packaging smoke action only uses synthetic test files. Never describe a prerelease as gameplay-tested unless the steps in `GAMEPLAY_QA.md` were actually completed.

@@ -1,6 +1,6 @@
 # Build and release HKMP gameplay fork
 
-**Development instructions — not yet a verified release.** The upstream project depends on copyrighted Hollow Knight/Unity/Modding API binaries that must be obtained from a game installation and compatible modding setup. Do not commit or upload those DLLs to this public repository.
+**Experimental prerelease:** [v3.0.0-coop-rc1](https://github.com/fnuaim-stack/HKMP/releases/tag/v3.0.0-coop-rc1) contains client and server binaries from a successful local build. Two-client gameplay remains unverified. The upstream project depends on copyrighted Hollow Knight/Unity/Modding API binaries that must be obtained from a game installation and compatible modding setup. Do not commit or upload those DLLs to this public repository.
 
 ## Local build (Windows)
 
@@ -39,6 +39,6 @@ An alternate, self-managed full-build runner can use locally installed Hollow Kn
 
 ## Shipping gate
 
-Only publish a GitHub **prerelease** after both client and server builds and the co-op scenarios pass. Provide the client and standalone-server binaries, compatible game/API version, mod dependencies, exact instructions, changelog, known limitations and SHA-256 artifact checksums. Keep original HKMP attribution and licensing.
+Publish only a GitHub **prerelease** after both client and server builds pass. State which co-op scenarios remain untested. Provide the client and standalone-server binaries, compatible game/API version, mod dependencies, exact instructions, changelog, known limitations and SHA-256 artifact checksums. Keep original HKMP attribution and licensing.
 
 Do not call a release stable until progression, combat, reconnects and save restoration work in actual gameplay.

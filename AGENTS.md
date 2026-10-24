@@ -23,5 +23,5 @@ This fork extends [Extremelyd1/HKMP](https://github.com/Extremelyd1/HKMP). Follo
 
 ## Verified versus unknown
 - The isolated production packet serialization smoke tests have passed in GitHub Actions.
-- Full C# build is currently blocked in the fork's inherited CI by a missing encrypted-dependencies secret.
+- Both .NET Framework 4.7.2 projects compiled on a Windows runner against the owner's private Hollow Knight 1.5.78.11833 Managed references for prerelease v3.0.0-coop-rc1. The inherited CI full build is still blocked by a missing encrypted-dependencies secret.
 - Two-client gameplay, bosses, merchants, all progression and reconnect remain **unverified**; use the QA scenarios to establish behavior rather than guessing.

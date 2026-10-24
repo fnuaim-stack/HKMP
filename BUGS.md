@@ -2,7 +2,7 @@
 
 Fork of [Extremelyd1/HKMP](https://github.com/Extremelyd1/HKMP). Gameplay review follows the [Co-op Anything](https://github.com/cranebeaker/coop-anything) `coop-revive`, `coop-sync-testing`, and `coop-qa` workflows.
 
-**IMPORTANT:** These fixes are source-level changes and isolated regression tests. No complete Hollow Knight/Modding API build or two-client gameplay session has been verified on this fork.
+**IMPORTANT:** A complete client/server build against the owner's Hollow Knight 1.5.78.11833 references and isolated regression tests passed for prerelease v3.0.0-coop-rc1. No two-client gameplay session has been verified on this fork.
 
 ## Code changes made
 
