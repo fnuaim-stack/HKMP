@@ -4,7 +4,7 @@ The Windows screenshots supplied by the owner show `HKMP.dll`, `HKMP.pdb`, `HKMP
 
 ## Runtime dependencies
 
-The client needs `HKMP.dll` and `BouncyCastle.Cryptography.dll`. The standalone server needs `HKMPServer.exe`, the **matching** `HKMP.dll`, `BouncyCastle.Cryptography.dll`, and `Newtonsoft.Json.dll`. The latter two are third-party runtime libraries, not included in the owner's screenshots. The build requires other game/Unity/PlayMaker/Modding API reference DLLs available privately from a compatible installation; **do not upload those to the public repo**.
+The client needs `HKMP.dll` and `BouncyCastle.Cryptography.dll`. The standalone server needs `HKMPServer.exe`, `HKMPServer.exe.config`, the **matching** `HKMP.dll`, `BouncyCastle.Cryptography.dll`, and `Newtonsoft.Json.dll`. The latter two are third-party runtime libraries, not included in the owner's screenshots. Both ZIPs include the project LGPL license and the third-party MIT license texts. The build requires other game/Unity/PlayMaker/Modding API reference DLLs available privately from a compatible installation; **do not upload those to the public repo**.
 
 ## Package previously compiled Windows builds
 

@@ -26,8 +26,14 @@ $roots=@($clientDir,$serverDir)
 if ($DependencyDir) { $roots+=(Resolve-Path -LiteralPath $DependencyDir).Path }
 $client=Find-RequiredFile 'HKMP.dll' @($clientDir)
 $server=Find-RequiredFile 'HKMPServer.exe' @($serverDir)
+$serverConfig=Find-RequiredFile 'HKMPServer.exe.config' @($serverDir)
 $crypto=Find-RequiredFile 'BouncyCastle.Cryptography.dll' $roots
 $json=Find-RequiredFile 'Newtonsoft.Json.dll' $roots
+$repositoryRoot=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
+$projectLicense=Find-RequiredFile 'LICENSE' @($repositoryRoot)
+$thirdPartyLicenses=Join-Path $repositoryRoot 'licenses'
+$cryptoLicense=Find-RequiredFile 'BouncyCastle.Cryptography-LICENSE.md' @($thirdPartyLicenses)
+$jsonLicense=Find-RequiredFile 'Newtonsoft.Json-LICENSE.md' @($thirdPartyLicenses)
 
 $serverClient=Join-Path $serverDir "HKMP.dll"
 if (Test-Path -LiteralPath $serverClient -PathType Leaf) {
@@ -44,18 +50,27 @@ New-Item -ItemType Directory -Path $serverFolder | Out-Null
 Copy-Item -LiteralPath $client -Destination $clientFolder
 Copy-Item -LiteralPath $crypto -Destination $clientFolder
 Copy-Item -LiteralPath $server -Destination $serverFolder
+Copy-Item -LiteralPath $serverConfig -Destination $serverFolder
 Copy-Item -LiteralPath $client -Destination $serverFolder
 Copy-Item -LiteralPath $crypto -Destination $serverFolder
 Copy-Item -LiteralPath $json -Destination $serverFolder
+foreach ($folder in @($clientFolder,$serverFolder)) {
+    Copy-Item -LiteralPath $projectLicense -Destination $folder
+    $licenseFolder=Join-Path $folder 'licenses'
+    New-Item -ItemType Directory -Path $licenseFolder | Out-Null
+    Copy-Item -LiteralPath $cryptoLicense,$jsonLicense -Destination $licenseFolder
+}
 
 $guide=@"
 HKMP co-op prerelease $Version
 Source commit claimed by builder: $SourceCommit
-Client: install with Hollow Knight Modding API.
+Built against supplied Hollow Knight 1.5.78.11833 Managed assemblies.
+Client: install with a matching Hollow Knight Modding API and Hook setup.
 Server: run HKMPServer.exe with dependencies next to it.
 Enable Full Synchronisation for enemies, world and save sync.
 Original project: https://github.com/Extremelyd1/HKMP (LGPL-2.1).
 Game, Unity, and proprietary DLLs are NOT included.
+Gameplay has not been verified; use backed-up test saves.
 Packaging does NOT prove binary provenance or gameplay correctness.
 "@
 Set-Content -LiteralPath (Join-Path $clientFolder 'INSTALL.txt') -Value $guide -Encoding UTF8

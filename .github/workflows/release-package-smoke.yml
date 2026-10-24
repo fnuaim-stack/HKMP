@@ -26,6 +26,7 @@ jobs:
           New-Item -ItemType Directory -Path smoke/client,smoke/server,smoke/deps -Force | Out-Null
           'mock-client' | Set-Content smoke/client/HKMP.dll
           'mock-server' | Set-Content smoke/server/HKMPServer.exe
+          'mock-config' | Set-Content smoke/server/HKMPServer.exe.config
           'mock-crypto' | Set-Content smoke/deps/BouncyCastle.Cryptography.dll
           'mock-json' | Set-Content smoke/deps/Newtonsoft.Json.dll
           ./scripts/package-release.ps1 -ClientDir smoke/client -ServerDir smoke/server -DependencyDir smoke/deps -OutputDir smoke/dist -SourceCommit "$env:GITHUB_SHA" -Version "v3.0.0-coop-rc1"
@@ -38,14 +39,14 @@ jobs:
           $a=[System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zip1).Path)
           try {
             $contents=@($a.Entries | ForEach-Object { $_.FullName })
-            if ('HKMP.dll' -notin $contents -or 'BouncyCastle.Cryptography.dll' -notin $contents) {
+            if ('HKMP.dll' -notin $contents -or 'BouncyCastle.Cryptography.dll' -notin $contents -or 'LICENSE' -notin $contents -or 'licenses/BouncyCastle.Cryptography-LICENSE.md' -notin $contents -or 'licenses/Newtonsoft.Json-LICENSE.md' -notin $contents) {
               throw 'Client bundle missing required dependencies'
             }
           } finally { $a.Dispose() }
           $b=[System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zip2).Path)
           try {
             $contents=@($b.Entries | ForEach-Object { $_.FullName })
-            foreach ($name in @('HKMPServer.exe','HKMP.dll','BouncyCastle.Cryptography.dll','Newtonsoft.Json.dll')) {
+            foreach ($name in @('HKMPServer.exe','HKMPServer.exe.config','HKMP.dll','BouncyCastle.Cryptography.dll','Newtonsoft.Json.dll','LICENSE','licenses/BouncyCastle.Cryptography-LICENSE.md','licenses/Newtonsoft.Json-LICENSE.md')) {
               if ($name -notin $contents) { throw "Server bundle missing $name" }
             }
           } finally { $b.Dispose() }

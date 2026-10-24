@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Hkmp.Util;
 using UnityEngine;
 using Logger = Hkmp.Logging.Logger;
 
@@ -178,7 +179,7 @@ internal static class TextureManager {
 
         // Create texture object and load buffer into texture
         var texture = new Texture2D(1, 1);
-        texture.LoadImage(byteBuffer.ToArray(), true);
+        ImageConversionUtil.LoadImage(texture, byteBuffer, true);
 
         return texture;
     }

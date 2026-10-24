@@ -4,6 +4,10 @@
 
 ## Local build (Windows)
 
+For the supplied Hollow Knight 1.5.78.11833 Managed reference set (ZIP SHA-256 `1DC53E91BFCCF69C29E6751396DF29C6B153D3E8749E3089183B64C33F047D95`), `HKMP/HKMP.csproj` now references the game's `netstandard.dll` 2.1 facade. `HKMP/Util/ImageConversionUtil.cs` selects Unity's byte-array `LoadImage` overload without asking the .NET Framework 4.7.2 compiler to resolve Unity's `ReadOnlySpan` overload. The two image call sites are `HKMP/Game/Client/Skin/SkinLoader.cs` and `HKMP/Ui/Resources/TextureManager.cs`.
+
+On a Windows runner with .NET SDK 9.0.319, the full client and server solution compiled with 0 errors and 33 Unity API deprecation warnings. The packet, chunk transport, save command, server save, and source syntax smoke programs passed. The image loader and multiplayer gameplay have not been run inside Hollow Knight; this remains a prerelease candidate.
+
 1. Install the .NET SDK that supports building .NET Framework 4.7.2 projects. For native Windows, install the .NET Framework 4.7.2 developer/targeting pack if the SDK requests it.
 2. Install a compatible Hollow Knight build and Hollow Knight Modding API. Ensure the required game assemblies and Modding API DLLs exist under the game's `hollow_knight_Data/Managed` directory or its modding folders.
 3. Copy or reference the DLL dependencies from the game installation in private local directories. `HKMP/LocalBuildProperties_example.props` and `HKMPServer/LocalBuildProperties_example.props` document the default `lib` folder and `References` property. Include `Newtonsoft.Json.dll`, MonoMod/Hook libraries, UnityEngine modules, PlayMaker and game assemblies as referenced by `HKMP.csproj`.

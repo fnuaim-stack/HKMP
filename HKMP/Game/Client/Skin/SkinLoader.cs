@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using Hkmp.Util;
 using UnityEngine;
 using Logger = Hkmp.Logging.Logger;
 
@@ -193,7 +194,7 @@ internal class SkinLoader {
         var textureBytes = File.ReadAllBytes(filePath);
         texture = new Texture2D(1, 1);
 
-        return texture.LoadImage(textureBytes, true);
+        return ImageConversionUtil.LoadImage(texture, textureBytes, true);
     }
 
     /// <summary>
