@@ -32,7 +32,7 @@ This manual checklist is **not executed**. Based on Co-op Anything's coop-revive
 
 ## Before tagging a release
 
-- [ ] Both C# projects compile in Release configuration with required game and Modding API assemblies
+- [x] Both projects compiled on Windows against Hollow Knight 1.5.78.11833 references for prerelease v3.0.0-coop-rc1 (0 errors; 33 Unity deprecation warnings)
 - [ ] Regression tests exist for queue processing, packet splitting, add-on dispatch and save recovery
 - [x] Production dedicated-server file recovery tested headlessly on Windows/Linux (stubbed game codec; not a game runtime test)
 - [x] Headless production sender/receiver test covers consecutive chunks, 256 slices, ACK reset and foreign-slice rejection (not in-game validation)
@@ -40,8 +40,8 @@ This manual checklist is **not executed**. Based on Co-op Anything's coop-revive
 - [ ] Boss, progression and NPC scenarios tested after reconnect and restart
 - [ ] Test with latency and loss; inspect client/server logs
 - [ ] Standalone server validated on Windows; Mono compatibility verified if advertised
-- [ ] Build artifacts, dependency list, checksums and installation instructions prepared
-- [ ] Release candidate first published as **prerelease**, not stable
+- [x] Prerelease v3.0.0-coop-rc1 includes matching client and server packages, dependencies, checksums and installation instructions
+- [x] v3.0.0-coop-rc1 published as a **prerelease**, not stable
 - [ ] Original LGPL license and credit preserved
 
 Never interpret a source-code change as proof a gameplay issue is fixed.

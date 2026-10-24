@@ -42,3 +42,21 @@ An alternate, self-managed full-build runner can use locally installed Hollow Kn
 Publish only a GitHub **prerelease** after both client and server builds pass. State which co-op scenarios remain untested. Provide the client and standalone-server binaries, compatible game/API version, mod dependencies, exact instructions, changelog, known limitations and SHA-256 artifact checksums. Keep original HKMP attribution and licensing.
 
 Do not call a release stable until progression, combat, reconnects and save restoration work in actual gameplay.
+
+## Version compatibility and upstream lineage
+
+This fork starts from [Extremelyd1/HKMP](https://github.com/Extremelyd1/HKMP) development master, **not** from its published v2.4.3 binary release. As of the 2026-10-23 comparison, that upstream master had 225 further commits, including experimental full-synchronisation logic. The fork preserved the original packet-ID definitions and .NET Framework 4.7.2 targets.
+
+**Compatible target:** Hollow Knight **1.5.78.11833** with the matching Modding API, PlayMaker and Unity managed assemblies. The client and standalone server must come from the **same fork build**. Do not mix the published v2.4.3 client with this fork's server. Newer game installations require a separate compatibility check.
+
+Source-reviewed changes include scene-host authority and deferred entity updates, per-client packet framing, matching add-on connection handlers, reliable chunk/ACK state, safe reconnects, dedicated-save recovery, and copy-save persistence. Isolated tests cover portions of these; game scenes, bosses, merchants and real saves remain unverified (see [GAMEPLAY_QA.md](GAMEPLAY_QA.md)).
+
+## Packaging and runtime dependencies
+
+Use the repository's package-release.ps1 script to create matching client and server ZIPs and SHA-256 checksums from binaries compiled at the **same commit**:
+
+    ./scripts/package-release.ps1 -ClientDir "<compiled HKMP directory>" -ServerDir "<compiled HKMPServer directory>" -DependencyDir "<runtime dependency directory>" -OutputDir ./dist -SourceCommit "<40-character commit SHA>" -Version "v3.0.0-coop-rc1"
+
+The client needs HKMP.dll and BouncyCastle.Cryptography.dll. The dedicated server needs HKMPServer.exe, HKMPServer.exe.config, the matching HKMP.dll, BouncyCastle.Cryptography.dll and Newtonsoft.Json.dll. Preserve the main LGPL LICENSE and all third-party license notices. **Do not publish proprietary game/Unity/Modding API reference DLLs.**
+
+The optional release-candidate.yml workflow publishes prereleases only with a successful **push** full-build run for the exact commit; the privately built v3.0.0-coop-rc1 prerelease did not use that workflow because inherited CI lacks the dependency-decryption secret. Synthetic packaging smoke checks are not a real build or gameplay test.
